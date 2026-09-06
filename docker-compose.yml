@@ -53,6 +53,7 @@ services:
       # students edit them with a normal editor and reload the browser.
       # WordPress core itself stays inside the container.
       - ./wp-content:/var/www/html/wp-content
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
 
 volumes:
   dbdata:
