@@ -96,7 +96,45 @@ If it ever looks wrong again (for example after `--reset`), redo it with:
 instead of being swallowed, and errors are also written to
 `wp-content/debug.log`. Set it to `0` for a clean-looking site.
 
+## Database dumps
+
+The database lives in a named Docker volume, not in this folder. That is
+deliberate: MySQL and MariaDB need filesystem guarantees that a bind mount
+through Docker Desktop does not reliably provide, so a `./db:/var/lib/mysql`
+mount is slow on macOS and can corrupt the database outright. A raw data
+directory is also not portable — a newer server writes a format an older one
+refuses to open — and it is thousands of binary files sitting in your project.
+
+Use a SQL dump instead. It is text, it survives version differences, and git
+can diff it.
+
+```bash
+./start.sh --dump                  # -> dumps/20260909-143000.sql
+./start.sh --dump dumps/seed.sql   # a name you choose
+./start.sh --restore               # newest file in dumps/
+./start.sh --restore dumps/seed.sql
+```
+
+`--restore` replaces every post, page and setting currently in the site, so it
+asks first. Add `-y` to skip the prompt in a script.
+
+`dumps/` is ignored by git with one exception: **`dumps/seed.sql` is tracked**.
+Commit a prepared site there and everyone starts from the same posts, pages and
+menus instead of clicking through the installer:
+
+```bash
+./start.sh --dump dumps/seed.sql
+git add -f dumps/seed.sql && git commit -m "Add seed database"
+```
+
+After a fresh clone, or after `--reset`, that state is one command away:
+
+```bash
+./start.sh -d && ./start.sh --restore dumps/seed.sql
+```
+
 ## Resetting
 
-The database lives in a named Docker volume, so `./start.sh --down` keeps your
-site and `./start.sh --reset` throws it away and gives you a fresh installer.
+`./start.sh --down` removes the containers but keeps the database.
+`./start.sh --reset` throws the database away too and gives you a fresh
+installer — take a dump first if you want that site back.

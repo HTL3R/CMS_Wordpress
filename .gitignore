@@ -20,6 +20,12 @@ wp-content/plugins/akismet/
 # Everything you write yourself under wp-content/themes/ and
 # wp-content/plugins/ IS tracked -- that is the point of the project.
 
+# Database dumps. A dump you deliberately name seed.sql IS tracked, so the
+# class can start from a prepared site instead of running the installer:
+#   ./start.sh --dump dumps/seed.sql
+dumps/*
+!dumps/seed.sql
+
 # Exported Docker images
 /_images/
 
